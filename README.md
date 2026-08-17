@@ -37,4 +37,4 @@ minikyumons-v11-rebuild-functional-harness.js
 assets/
 ```
 
-A V1.1 publicada serve como referência estável para as próximas melhorias de arte. O pacote `assets/animations64/fire_rebuild` organiza os novos sprites do MiniKyumon de Fogo em sequências de idle, lanche, água, comida, brincar, ataque e sono com `Zzz`. Os arquivos originais permanecem em 64 × 64 px, com transparência preservada e sem reamostragem.
+A V1.1 publicada serve como referência estável para as próximas melhorias de arte. Os pacotes `assets/animations64/fire_rebuild` e `assets/animations64/water_rebuild` organizam os novos sprites dos MiniKyumons de Fogo e Água. Fogo possui idle, lanche, água, comida, brincar, ataque e sono com `Zzz`; Água possui idle, olhar lateral, lanche com maçã e água. Os frames de Fogo já eram 64 × 64 px; os frames de Água foram reduzidos de 256 × 256 para 64 × 64 usando nearest-neighbor, preservando transparência e pixels nítidos.

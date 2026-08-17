@@ -1,0 +1,44 @@
+{
+  "source": "C:/Users/samuk/Downloads/assets/water sprites",
+  "source_canvas": "256x256",
+  "game_canvas": "64x64",
+  "resampling": "nearest-neighbor, no smoothing",
+  "sequences": {
+    "idle": [
+      "idle-01.png",
+      "idle-02.png",
+      "idle-03.png",
+      "idle-04.png",
+      "idle-05.png",
+      "idle-06.png",
+      "idle-07.png"
+    ],
+    "water": [
+      "water-01.png",
+      "water-02.png",
+      "water-03.png",
+      "water-04.png",
+      "water-05.png",
+      "water-06.png",
+      "water-07.png"
+    ],
+    "head-turn": [
+      "head-turn-01.png",
+      "head-turn-02.png",
+      "head-turn-03.png",
+      "head-turn-04.png",
+      "head-turn-05.png",
+      "head-turn-06.png",
+      "head-turn-07.png"
+    ],
+    "snack": [
+      "snack-01.png",
+      "snack-02.png",
+      "snack-03.png",
+      "snack-04.png",
+      "snack-05.png",
+      "snack-06.png",
+      "snack-07.png"
+    ]
+  }
+}

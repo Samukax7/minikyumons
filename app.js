@@ -261,12 +261,13 @@
   function assetPathFor(expression) {
     var species = state.species;
     if (species === "Água") {
-      if (expression === "eating") { return "assets/animations64/water/eating-01.png"; }
+      if (expression === "eating" || expression === "snack") { return "assets/animations64/water_rebuild/snack-01.png"; }
+      if (expression === "water") { return "assets/animations64/water_rebuild/water-01.png"; }
+      if (expression === "pet") { return "assets/animations64/water_rebuild/head-turn-01.png"; }
+      if (expression === "sleep") { return "assets/animations64/water/sleep-01.png"; }
       if (expression === "play") { return "assets/animations64/water/play-01.png"; }
       if (expression === "clean") { return "assets/animations64/water/clean-01.png"; }
-      if (expression === "pet") { return "assets/animations64/water/pet-01.png"; }
-      if (expression === "sleep") { return "assets/animations64/water/sleep-01.png"; }
-      return "assets/animations64/water/idle-01.png";
+      return "assets/animations64/water_rebuild/idle-01.png";
     }
     if (species === "Planta") {
       return "assets/plant64/" + ({ eating: "eating", happy: "happy", sleep: "sleep", sad: "sad" }[expression] || "neutral") + ".png";
@@ -280,11 +281,11 @@
     return "assets/animations64/water/idle-01.png";
   }
   function sequenceSpec(name) {
-    var folder = state.species === "Água" ? "water" : (state.species === "Fogo" ? "fire_rebuild" : null);
+    var folder = state.species === "Água" ? "water_rebuild" : (state.species === "Fogo" ? "fire_rebuild" : null);
     if (!folder) { return null; }
-    var counts = folder === "fire_rebuild" ? { idle: 4, snack: 7, water: 7, meal: 4, play: 7, attack: 7, sleep: 7, "sleep-zzz": 7 } : { idle: 15, eating: 5, play: 3, clean: 3, pet: 3, sleep: 6 };
+    var counts = folder === "fire_rebuild" ? { idle: 4, snack: 7, water: 7, meal: 4, play: 7, attack: 7, sleep: 7, "sleep-zzz": 7 } : { idle: 7, snack: 7, water: 7, "head-turn": 7 };
     if (!counts[name]) { return null; }
-    return { folder: folder, count: counts[name], delay: folder === "fire_rebuild" ? (name === "sleep" || name === "sleep-zzz" ? 280 : 145) : (name === "sleep" ? 380 : (name === "idle" ? 180 : 150)) };
+    return { folder: folder, count: counts[name], delay: folder === "fire_rebuild" ? (name === "sleep" || name === "sleep-zzz" ? 280 : 145) : (name === "idle" ? 180 : (name === "head-turn" ? 170 : 145)) };
   }
   function playSequence(name, repeatCount, done) {
     if (statusOpen || titleOpen || eggOpen || hatchInYard) { return; }
@@ -484,14 +485,14 @@
     state.hygiene = clamp(state.hygiene + 30); state.dirt = 0; state.poop = 0; state.happiness = clamp(state.happiness + 7); state.health = clamp(state.health + 4); finishAction("clean", "tudo limpo e aconchegante", state.species === "Fogo" ? "play" : "clean", "wiggle");
   }
   function performPet() {
-    state.happiness = clamp(state.happiness + 11); state.energy = clamp(state.energy + 1); state.health = clamp(state.health + 2); finishAction("pet", "ele adorou o carinho", state.species === "Fogo" ? "play" : "pet", "nod");
+    state.happiness = clamp(state.happiness + 11); state.energy = clamp(state.energy + 1); state.health = clamp(state.health + 2); finishAction("pet", "ele adorou o carinho", state.species === "Fogo" ? "play" : (state.species === "Água" ? "head-turn" : "pet"), "nod");
   }
   function performFeed(option) {
     state.sleeping = false; state.expression = "neutral";
     if (option === "snack") { state.hunger = clamp(state.hunger + 8); state.happiness = clamp(state.happiness + 3); state.poop = clamp(state.poop + 5); }
     else if (option === "meal") { state.hunger = clamp(state.hunger + 25); state.happiness = clamp(state.happiness + 4); state.poop = clamp(state.poop + 18); }
     else { state.hunger = clamp(state.hunger + 2); state.hygiene = clamp(state.hygiene + 3); state.health = clamp(state.health + 1); }
-    submenu = null; var feedAnimation = state.species === "Fogo" ? option : "eating"; finishAction(option, option === "water" ? "água fresquinha" : (option === "meal" ? "comida servida" : "um lanchinho"), feedAnimation, "bounce");
+    submenu = null; var feedAnimation = state.species === "Fogo" ? option : (state.species === "Água" ? (option === "water" ? "water" : "snack") : "eating"); finishAction(option, option === "water" ? "água fresquinha" : (option === "meal" ? "comida servida" : "um lanchinho"), feedAnimation, "bounce");
   }
   function performPlay(option) {
     if (state.energy <= 12) { state.happiness = clamp(state.happiness + 1); toast("Ele está cansado; uma pausa gentil ajuda."); remember(state.name + " recebeu um limite gentil."); save(); render(); return; }
