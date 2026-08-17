@@ -1,0 +1,72 @@
+{
+  "source": "C:/Users/samuk/Downloads/assets/fire sprites",
+  "canvas": "64x64",
+  "sequences": {
+    "idle": [
+      "idle-01.png",
+      "idle-02.png",
+      "idle-03.png",
+      "idle-04.png"
+    ],
+    "snack": [
+      "snack-01.png",
+      "snack-02.png",
+      "snack-03.png",
+      "snack-04.png",
+      "snack-05.png",
+      "snack-06.png",
+      "snack-07.png"
+    ],
+    "water": [
+      "water-01.png",
+      "water-02.png",
+      "water-03.png",
+      "water-04.png",
+      "water-05.png",
+      "water-06.png",
+      "water-07.png"
+    ],
+    "meal": [
+      "meal-01.png",
+      "meal-02.png",
+      "meal-03.png",
+      "meal-04.png"
+    ],
+    "play": [
+      "play-01.png",
+      "play-02.png",
+      "play-03.png",
+      "play-04.png",
+      "play-05.png",
+      "play-06.png",
+      "play-07.png"
+    ],
+    "attack": [
+      "attack-01.png",
+      "attack-02.png",
+      "attack-03.png",
+      "attack-04.png",
+      "attack-05.png",
+      "attack-06.png",
+      "attack-07.png"
+    ],
+    "sleep": [
+      "sleep-01.png",
+      "sleep-02.png",
+      "sleep-03.png",
+      "sleep-04.png",
+      "sleep-05.png",
+      "sleep-06.png",
+      "sleep-07.png"
+    ],
+    "sleep-zzz": [
+      "sleep-zzz-01.png",
+      "sleep-zzz-02.png",
+      "sleep-zzz-03.png",
+      "sleep-zzz-04.png",
+      "sleep-zzz-05.png",
+      "sleep-zzz-06.png",
+      "sleep-zzz-07.png"
+    ]
+  }
+}

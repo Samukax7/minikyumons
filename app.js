@@ -280,7 +280,10 @@
   function setAsset(path) {
     var asset = byId("pet-asset");
     if (!asset) { return; }
-    asset.onerror = function () { asset.onerror = null; asset.src = "assets/animations64/water/idle-01.png"; };
+    asset.onerror = function () {
+      asset.onerror = null;
+      asset.src = state && state.species === "Fogo" ? "assets/animations64/fire_rebuild/idle-01.png" : "assets/animations64/water/idle-01.png";
+    };
     asset.src = path;
   }
   function assetPathFor(expression) {
@@ -296,16 +299,20 @@
     if (species === "Planta") {
       return "assets/plant64/" + ({ eating: "eating", happy: "happy", sleep: "sleep", sad: "sad" }[expression] || "neutral") + ".png";
     }
-    if (state.level >= 10) {
-      return "assets/fire_stage2/fire_stage2_" + ({ eating: "eating", happy: "happy", sleep: "sleep", sad: "sad" }[expression] || "neutral") + ".png";
+    if (species === "Fogo") {
+      if (expression === "eating") { return "assets/animations64/fire_rebuild/meal-01.png"; }
+      if (expression === "happy" || expression === "play") { return "assets/animations64/fire_rebuild/play-01.png"; }
+      if (expression === "sleep") { return "assets/animations64/fire_rebuild/sleep-01.png"; }
+      return "assets/animations64/fire_rebuild/idle-01.png";
     }
-    return "assets/fire_fixed64/" + ({ eating: "eating", happy: "happy", sleep: "sleep", clean: "clean_jump", pet: "affection" }[expression] || "base") + ".png";
+    return "assets/animations64/water/idle-01.png";
   }
   function sequenceSpec(name) {
-    if (state.species !== "Água") { return null; }
-    var counts = { idle: 15, eating: 5, play: 3, clean: 3, pet: 3, sleep: 6 };
+    var folder = state.species === "Água" ? "water" : (state.species === "Fogo" ? "fire_rebuild" : null);
+    if (!folder) { return null; }
+    var counts = folder === "fire_rebuild" ? { idle: 4, snack: 7, water: 7, meal: 4, play: 7, attack: 7, sleep: 7, "sleep-zzz": 7 } : { idle: 15, eating: 5, play: 3, clean: 3, pet: 3, sleep: 6 };
     if (!counts[name]) { return null; }
-    return { count: counts[name], delay: name === "sleep" ? 380 : (name === "idle" ? 180 : 150) };
+    return { folder: folder, count: counts[name], delay: folder === "fire_rebuild" ? (name === "sleep" || name === "sleep-zzz" ? 280 : 145) : (name === "sleep" ? 380 : (name === "idle" ? 180 : 150)) };
   }
   function playSequence(name, repeatCount, done) {
     if (statusOpen || titleOpen || eggOpen || hatchInYard || devLogOpen) { return; }
@@ -324,7 +331,7 @@
     function step() {
       if (token !== animationToken || statusOpen || devLogOpen) { return; }
       var suffix = frame < 10 ? "0" + frame : String(frame);
-      setAsset("assets/animations64/water/" + name + "-" + suffix + ".png");
+      setAsset("assets/animations64/" + spec.folder + "/" + name + "-" + suffix + ".png");
       frame += 1;
       if (frame > spec.count) {
         frame = 1; cycles += 1;
@@ -501,29 +508,29 @@
     if (id === "pet") { performPet(); }
   }
   function finishAction(actionName, message, animationName, reaction) {
-    state.care += 1; recordRoutine(actionName); gainBond(actionName === "pet" ? 2 : 1); remember(state.name + " recebeu " + message + "."); save(); render(); spawnParticles(actionName === "pet" ? "pet" : actionName === "clean" ? "clean" : "play"); react(reaction || "bounce"); logEvent("Ação concluída: " + actionName + "."); toast(message.charAt(0).toUpperCase() + message.slice(1) + "."); playSequence(animationName, 2, returnToIdle);
+    state.care += 1; recordRoutine(actionName); gainBond(actionName === "pet" ? 2 : 1); remember(state.name + " recebeu " + message + "."); save(); render(); var particleKind = actionName === "pet" ? "pet" : (actionName === "clean" ? "clean" : ((actionName === "snack" || actionName === "meal" || actionName === "water") ? "feed" : "play")); spawnParticles(particleKind); react(reaction || "bounce"); logEvent("Ação concluída: " + actionName + "."); toast(message.charAt(0).toUpperCase() + message.slice(1) + "."); playSequence(animationName, 2, returnToIdle);
   }
   function performClean() {
     if (state.hygiene >= 94 && state.dirt < 10 && state.poop < 10) { state.happiness = clamp(state.happiness + 1); toast("Está tudo limpinho por aqui."); logEvent("Limpeza conferida sem necessidade de intervenção."); return; }
-    state.hygiene = clamp(state.hygiene + 30); state.dirt = 0; state.poop = 0; state.happiness = clamp(state.happiness + 7); state.health = clamp(state.health + 4); finishAction("clean", "tudo limpo e aconchegante", "clean", "wiggle");
+    state.hygiene = clamp(state.hygiene + 30); state.dirt = 0; state.poop = 0; state.happiness = clamp(state.happiness + 7); state.health = clamp(state.health + 4); finishAction("clean", "tudo limpo e aconchegante", state.species === "Fogo" ? "play" : "clean", "wiggle");
   }
   function performPet() {
-    state.happiness = clamp(state.happiness + 11); state.energy = clamp(state.energy + 1); state.health = clamp(state.health + 2); finishAction("pet", "ele adorou o carinho", "pet", "nod");
+    state.happiness = clamp(state.happiness + 11); state.energy = clamp(state.energy + 1); state.health = clamp(state.health + 2); finishAction("pet", "ele adorou o carinho", state.species === "Fogo" ? "play" : "pet", "nod");
   }
   function performFeed(option) {
     state.sleeping = false; state.expression = "neutral";
     if (option === "snack") { state.hunger = clamp(state.hunger + 8); state.happiness = clamp(state.happiness + 3); state.poop = clamp(state.poop + 5); }
     else if (option === "meal") { state.hunger = clamp(state.hunger + 25); state.happiness = clamp(state.happiness + 4); state.poop = clamp(state.poop + 18); }
     else { state.hunger = clamp(state.hunger + 2); state.hygiene = clamp(state.hygiene + 3); state.health = clamp(state.health + 1); }
-    submenu = null; finishAction(option, option === "water" ? "água fresquinha" : (option === "meal" ? "comida servida" : "um lanchinho"), "eating", "bounce");
+    submenu = null; var feedAnimation = state.species === "Fogo" ? option : "eating"; finishAction(option, option === "water" ? "água fresquinha" : (option === "meal" ? "comida servida" : "um lanchinho"), feedAnimation, "bounce");
   }
   function performPlay(option) {
     if (state.energy <= 12) { state.happiness = clamp(state.happiness + 1); toast("Ele está cansado; uma pausa gentil ajuda."); remember(state.name + " recebeu um limite gentil."); save(); render(); logEvent("Brincadeira adiada por energia baixa."); return; }
-    state.happiness = clamp(state.happiness + (option === "dance" ? 15 : option === "train" ? 11 : 9)); state.energy = clamp(state.energy - (option === "dance" ? 6 : option === "train" ? 8 : 3)); state.hunger = clamp(state.hunger - 2); state.hygiene = clamp(state.hygiene - 1); submenu = null; finishAction(option, option === "dance" ? "que dança divertida" : (option === "train" ? "treino concluído" : "passeio tranquilo"), "play", "shake");
+    state.happiness = clamp(state.happiness + (option === "dance" ? 15 : option === "train" ? 11 : 9)); state.energy = clamp(state.energy - (option === "dance" ? 6 : option === "train" ? 8 : 3)); state.hunger = clamp(state.hunger - 2); state.hygiene = clamp(state.hygiene - 1); submenu = null; var playAnimation = state.species === "Fogo" && option === "train" ? "attack" : "play"; finishAction(option, option === "dance" ? "que dança divertida" : (option === "train" ? "treino concluído" : "passeio tranquilo"), playAnimation, "shake");
   }
   function performSleep(option) {
     var gain = option === "quick" ? 16 : (option === "nap" ? 34 : 55);
-    state.energy = clamp(state.energy + gain); state.health = clamp(state.health + (option === "deep" ? 7 : 4)); state.hunger = clamp(state.hunger - (option === "deep" ? 4 : 2)); state.happiness = clamp(state.happiness + 2); state.care += 1; recordRoutine("sleep_" + option); gainBond(1); remember(state.name + " descansou com tranquilidade."); state.sleeping = true; state.expression = "sleep"; submenu = null; clearAnimation(); save(); render(); spawnParticles("sleep"); logEvent("Sono iniciado: " + option + "."); toast("Zzz... uma pausa faz bem."); playSequence("sleep", 0, null);
+    state.energy = clamp(state.energy + gain); state.health = clamp(state.health + (option === "deep" ? 7 : 4)); state.hunger = clamp(state.hunger - (option === "deep" ? 4 : 2)); state.happiness = clamp(state.happiness + 2); state.care += 1; recordRoutine("sleep_" + option); gainBond(1); remember(state.name + " descansou com tranquilidade.");     state.sleeping = true; state.expression = "sleep"; submenu = null; clearAnimation(); save(); render(); spawnParticles("sleep"); logEvent("Sono iniciado: " + option + "."); toast("Zzz... uma pausa faz bem."); playSequence(state.species === "Fogo" ? "sleep-zzz" : "sleep", 0, null);
   }
   function backAction() {
     if (devLogOpen) { closeDevLog(); return false; }
