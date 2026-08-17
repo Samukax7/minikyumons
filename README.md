@@ -4,7 +4,7 @@ MiniKyumons é um pet virtual offline e não punitivo, derivado do AuroraPet e i
 
 ## Fluxo inicial
 
-A aplicação começa em `START / OPTIONS / EXIT`. `START` abre a escolha entre os ovos de Água, Planta e Fogo. O ovo selecionado permanece no quintal durante a eclosão, recebe uma animação curta com partículas elementais e então revela o MiniKyumon.
+A aplicação começa em `START / OPTIONS / EXIT`. `START` sempre abre a escolha entre os ovos de Água, Planta e Fogo, inclusive quando já existe um save anterior. O ovo selecionado permanece no quintal durante a eclosão, recebe uma animação curta com partículas elementais e então revela o MiniKyumon.
 
 ## Controles
 

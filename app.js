@@ -387,14 +387,12 @@
 
   }
   function showEggSelection() {
-    titleOpen = false; eggOpen = true; statusOpen = false; submenu = null;
+    titleOpen = false; eggOpen = true; statusOpen = false; submenu = null; eggSelected = 0;
     setOverlay("title-modal", false); setOverlay("hatch-modal", false); setOverlay("egg-modal", true); renderEggChoices();
 
   }
   function startTitle() {
-    if (state.started) {
-      titleOpen = false; setOverlay("title-modal", false); render(); playSequence("idle", 2, null); toast("Bem-vindo de volta!");
-    } else { showEggSelection(); }
+    showEggSelection();
   }
   function beginHatch() {
     var species = speciesList[eggSelected];
