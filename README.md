@@ -14,19 +14,17 @@ A aplicação começa em `START / OPTIONS / EXIT`. `START` abre a escolha entre 
 | Verde / A | Confirma a opção ou executa a ação |
 | Amarelo / B | Volta de submenu, retorna dos ovos ao título ou recolhe/abre o menu principal |
 | Rosa / S | Abre e fecha a tela de status |
-| L ou LOG | Abre e fecha o DEV LOG |
 
 ## Recursos da V1.1
 
 A build possui menu retrátil com alimentação, brincadeiras e opções de sono; gameplay não punitivo; sujeira e cocô como consequências leves; evolução de nível 1 a 30 com três estágios; ciclo visual de manhã, tarde e noite; nuvens, grama e órbita solar/lunar; animação de respiração durante o sono com partículas `z`, partículas de interação, salvamento local versionado e backup automático.
-
-O DEV LOG permanece salvo no navegador, registra ações importantes e pode ser exportado para TXT. O jogo não usa dependências externas e funciona offline a partir de `index.html` ou do launcher WebView2.
+ O jogo não usa dependências externas e funciona offline a partir de `index.html` ou do launcher WebView2.
 
 ## Execução local
 
 No Windows, execute `MiniKyumons-WebView2.cmd`. O launcher abre o Edge em modo aplicativo, usa o perfil `webview-profile` da própria build e aplica um parâmetro de cache bust para evitar a abertura de arquivos antigos.
 
-Para executar uma regressão funcional no ambiente de desenvolvimento, use `minikyumons-v11-rebuild-functional-harness.js` com Node.js. A bateria cobre título, DEV LOG, seleção de ovos, eclosão, alimentação, brincadeira, limpeza, carinho, sono, status, botão amarelo e `Novo ovo`.
+Para executar uma regressão funcional no ambiente de desenvolvimento, use `minikyumons-v11-rebuild-functional-harness.js` com Node.js. A bateria cobre título, seleção de ovos, eclosão, alimentação, brincadeira, limpeza, carinho, sono, status e botão amarelo.
 
 ## Estrutura
 

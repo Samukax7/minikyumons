@@ -51,7 +51,6 @@ function fail(name) { failures += 1; console.log("FAIL|" + name); }
 function assertTrue(condition, name) { if (condition) { pass(name); } else { fail(name); } }
 function state() { return windowShim.__miniKyumonsDebug.getState(); }
 assertTrue(elements["title-modal"].style.display === "block", "tela inicial abre no menu de titulo");
-click("dev-log-button"); assertTrue(elements["dev-log-modal"].style.display === "block", "DEV LOG abre"); click("dev-log-close"); assertTrue(elements["dev-log-modal"].style.display === "none", "DEV LOG fecha"); assertTrue(elements["title-modal"].style.display === "block", "fechar DEV LOG restaura titulo");
 click("green-button"); assertTrue(elements["egg-modal"].style.display === "block", "START abre os tres ovos"); click("dpad-right"); assertTrue(elements["egg-plant"].className.indexOf("selected") >= 0, "D-pad navega para ovo Planta"); click("green-button"); assertTrue(elements["hatch-yard-egg"].style.display === "block", "confirmar ovo inicia eclosao no quintal");
 assertTrue(runUntil(function () { return state().started === true; }, 60), "eclosao termina e inicia o pet"); assertTrue(elements["hatch-yard-egg"].style.display === "none", "ovo some apos eclosao");
 click("green-button"); assertTrue(elements["submenu-strip"].className.indexOf("menu-hidden") < 0, "Alimentar abre submenu"); click("dpad-left"); click("green-button"); assertTrue(state().hygiene > 68, "Agua melhora higiene");
@@ -60,6 +59,6 @@ click("dpad-right"); click("green-button"); var beforeHygiene = state().hygiene;
 click("dpad-right"); click("green-button"); assertTrue(state().happiness > 82, "carinho melhora humor");
 click("dpad-right"); click("green-button"); click("green-button"); assertTrue(state().sleeping === true, "sono ativa animacao de dormir");
 click("pink-button"); assertTrue(elements["status-view"].style.display === "block", "pink abre status"); click("pink-button"); assertTrue(elements["status-view"].style.display === "none", "pink fecha status");
-click("dpad-right"); click("green-button"); assertTrue(elements["egg-modal"].style.display === "block", "Novo ovo reabre selecao de ovos"); click("yellow-button"); assertTrue(elements["title-modal"].style.display === "block", "amarelo volta dos ovos para o titulo");
+assertTrue(elements["carousel-track"].innerHTML.indexOf("Novo ovo") < 0, "menu principal não possui Novo ovo");
 console.log("RESULT=" + (failures ? "FAIL" : "PASS") + " failures=" + failures);
 process.exitCode = failures ? 1 : 0;

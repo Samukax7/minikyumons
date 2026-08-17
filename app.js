@@ -3,7 +3,6 @@
 
   var SAVE_KEY = "minikyumons_save_v5_zero_rebuild";
   var BACKUP_KEY = "minikyumons_save_v5_zero_rebuild_backup";
-  var LOG_KEY = "minikyumons_dev_log_v5_zero_rebuild";
   var SAVE_VERSION = 5;
   var speciesList = ["Água", "Planta", "Fogo"];
   var titleItems = ["START", "OPTIONS", "EXIT"];
@@ -12,8 +11,7 @@
     { id: "play", icon: "✦", label: "Brincar" },
     { id: "clean", icon: "≈", label: "Limpar" },
     { id: "pet", icon: "♡", label: "Carinho" },
-    { id: "sleep", icon: "z", label: "Dormir" },
-    { id: "new", icon: "+", label: "Novo ovo" }
+    { id: "sleep", icon: "z", label: "Dormir" }
   ];
   var menus = {
     feed: [{ id: "snack", icon: "·", label: "Lanche" }, { id: "meal", icon: "●", label: "Comida" }, { id: "water", icon: "≈", label: "Água" }],
@@ -26,7 +24,6 @@
   var eggOpen = false;
   var hatchInYard = false;
   var statusOpen = false;
-  var devLogOpen = false;
   var menuOpen = true;
   var submenu = null;
   var selected = 0;
@@ -39,7 +36,6 @@
   var animationToken = 0;
   var hatchTimer = null;
   var idleTimer = null;
-  var devLog = [];
 
   function byId(id) { return document.getElementById(id); }
   function clamp(value) { return Math.max(0, Math.min(100, Math.round(Number(value || 0) * 10) / 10)); }
@@ -114,12 +110,11 @@
     }
     if (!state) { state = newPet("Água"); }
     normalizeState();
-    loadLog();
     applyOfflineTime();
     titleOpen = true;
     menuOpen = true;
     save();
-    logEvent("Aplicação iniciada na tela de título.");
+
   }
   function applyOfflineTime() {
     var current = new Date().getTime();
@@ -146,35 +141,6 @@
       if (previous && previous !== serialized) { localStorage.setItem(BACKUP_KEY, previous); }
       localStorage.setItem(SAVE_KEY, serialized);
     } catch (e) {}
-  }
-  function loadLog() {
-    var raw = null;
-    try { raw = localStorage.getItem(LOG_KEY); } catch (e) { raw = null; }
-    if (raw) { try { devLog = JSON.parse(raw); } catch (e2) { devLog = []; } }
-    if (!(devLog instanceof Array)) { devLog = []; }
-    renderLog();
-  }
-  function saveLog() {
-    try { localStorage.setItem(LOG_KEY, JSON.stringify(devLog.slice(-300))); } catch (e) {}
-  }
-  function logEvent(message) {
-    var entry = { time: nowText(), text: String(message) };
-    devLog.push(entry);
-    if (devLog.length > 300) { devLog = devLog.slice(-300); }
-    saveLog();
-    renderLog();
-  }
-  function renderLog() {
-    var list = byId("dev-log-list");
-    var count = byId("dev-log-count");
-    if (count) { count.innerHTML = devLog.length + (devLog.length === 1 ? " evento" : " eventos"); }
-    if (!list) { return; }
-    if (!devLog.length) { list.innerHTML = "<div class=\"dev-log-entry\">Nenhum evento registrado.</div>"; return; }
-    var html = "";
-    var start = Math.max(0, devLog.length - 120);
-    for (var i = start; i < devLog.length; i += 1) { html += "<div class=\"dev-log-entry\">[" + escapeHtml(devLog[i].time) + "] " + escapeHtml(devLog[i].text) + "</div>"; }
-    list.innerHTML = html;
-    list.scrollTop = list.scrollHeight;
   }
   function remember(text) {
     if (!state || !(state.memories instanceof Array)) { return; }
@@ -209,12 +175,12 @@
     if (showMessage && state.level > oldLevel) {
       remember(state.name + " alcançou o nível " + state.level + ".");
       toast("Nível " + state.level + " alcançado!");
-      logEvent("Evolução de progresso: nível " + state.level + ".");
+
     }
     if (state.stage !== oldStage) {
       remember(state.name + " entrou no estágio " + state.stage + ".");
       if (showMessage) { toast("Novo estágio: " + state.stage + "!"); }
-      logEvent("Mudança de estágio: " + state.stage + ".");
+
     }
   }
   function gainBond(amount) {
@@ -241,10 +207,16 @@
   function updateDayNight() {
     var home = byId("home-view");
     var yard = byId("yard-background");
+    var orbit = byId("celestial-orbit");
     var h = new Date().getHours();
     var period = h >= 6 && h < 12 ? "manha" : (h >= 12 && h < 18 ? "tarde" : "noite");
     if (home) { home.className = "screen-view home-view time-" + (period === "manha" ? "morning" : (period === "tarde" ? "afternoon" : "night")); }
     if (yard) { yard.style.backgroundImage = "url('assets/yard/" + period + ".png')"; yard.setAttribute("data-period", period); }
+    if (orbit) {
+      var hourAngle = (h * 15) - 90;
+      orbit.style.transform = "rotate(" + hourAngle + "deg)";
+      orbit.setAttribute("data-hour", String(h));
+    }
   }
   function setBar(prefix, value) {
     var fill = byId(prefix);
@@ -315,7 +287,7 @@
     return { folder: folder, count: counts[name], delay: folder === "fire_rebuild" ? (name === "sleep" || name === "sleep-zzz" ? 280 : 145) : (name === "sleep" ? 380 : (name === "idle" ? 180 : 150)) };
   }
   function playSequence(name, repeatCount, done) {
-    if (statusOpen || titleOpen || eggOpen || hatchInYard || devLogOpen) { return; }
+    if (statusOpen || titleOpen || eggOpen || hatchInYard) { return; }
     if (animationTimer) { window.clearTimeout(animationTimer); animationTimer = null; }
     var spec = sequenceSpec(name);
     if (!spec) {
@@ -329,7 +301,7 @@
     var cycles = 0;
     var maxCycles = repeatCount || 0;
     function step() {
-      if (token !== animationToken || statusOpen || devLogOpen) { return; }
+      if (token !== animationToken || statusOpen) { return; }
       var suffix = frame < 10 ? "0" + frame : String(frame);
       setAsset("assets/animations64/" + spec.folder + "/" + name + "-" + suffix + ".png");
       frame += 1;
@@ -347,7 +319,7 @@
     if (!state.sleeping) { state.expression = "neutral"; render(); playSequence("idle", 2, null); }
   }
   function idleStep() {
-    if (!state || !state.started || titleOpen || eggOpen || hatchInYard || statusOpen || devLogOpen || submenu || state.sleeping || animationTimer) { return; }
+    if (!state || !state.started || titleOpen || eggOpen || hatchInYard || statusOpen || submenu || state.sleeping || animationTimer) { return; }
     playSequence("idle", 2, null);
   }
   function react(kind) {
@@ -412,16 +384,16 @@
   function showStartupTitle() {
     titleOpen = true; eggOpen = false; statusOpen = false; submenu = null; menuOpen = true;
     setOverlay("egg-modal", false); setOverlay("hatch-modal", false); setOverlay("title-modal", true); renderTitleMenu(); render();
-    logEvent("Menu inicial exibido: START / OPTIONS / EXIT.");
+
   }
   function showEggSelection() {
     titleOpen = false; eggOpen = true; statusOpen = false; submenu = null;
     setOverlay("title-modal", false); setOverlay("hatch-modal", false); setOverlay("egg-modal", true); renderEggChoices();
-    logEvent("Tela de seleção dos três ovos exibida.");
+
   }
   function startTitle() {
     if (state.started) {
-      titleOpen = false; setOverlay("title-modal", false); render(); logEvent("START retornou ao pet existente."); playSequence("idle", 2, null); toast("Bem-vindo de volta!");
+      titleOpen = false; setOverlay("title-modal", false); render(); playSequence("idle", 2, null); toast("Bem-vindo de volta!");
     } else { showEggSelection(); }
   }
   function beginHatch() {
@@ -434,13 +406,13 @@
     if (holder) { holder.className = "pet-placeholder asset-mode hatching"; }
     byId("hatch-egg").src = egg.src;
     byId("hatch-pet").src = assetPathFor("neutral");
-    logEvent("Eclosão iniciada para o ovo de " + species + ".");
+
     toast("O ovo está se aquecendo...");
     if (hatchTimer) { window.clearTimeout(hatchTimer); }
     hatchTimer = window.setTimeout(function () {
       spawnHatchParticles(species);
       if (holder) { holder.className = "pet-placeholder asset-mode hatching revealing"; }
-      logEvent("Partículas de eclosão liberadas.");
+
       hatchTimer = window.setTimeout(function () { finishHatch(species); }, 900);
     }, 4300);
   }
@@ -451,12 +423,12 @@
     if (egg) { egg.style.display = "none"; }
     var holder = byId("pet-placeholder");
     if (holder) { holder.className = "pet-placeholder asset-mode"; }
-    save(); render(); logEvent("Eclosão concluída: " + species + " chegou ao quintal."); toast("Seu primeiro MiniKyumon chegou!"); playSequence("idle", 2, null);
+    save(); render(); toast("Seu primeiro MiniKyumon chegou!"); playSequence("idle", 2, null);
   }
   function move(direction) {
-    if (hatchInYard || statusOpen || devLogOpen) { return; }
+    if (hatchInYard || statusOpen) { return; }
     if (titleOpen) { titleSelected = (titleSelected + direction + titleItems.length) % titleItems.length; renderTitleMenu(); return; }
-    if (eggOpen) { eggSelected = (eggSelected + direction + speciesList.length) % speciesList.length; renderEggChoices(); logEvent("Ovo destacado: " + speciesList[eggSelected] + "."); return; }
+    if (eggOpen) { eggSelected = (eggSelected + direction + speciesList.length) % speciesList.length; renderEggChoices(); return; }
     if (!menuOpen) { return; }
     if (submenu) {
       var list = menus[submenu]; submenuSelected = (submenuSelected + direction + list.length) % list.length; renderCarousel(); return;
@@ -464,7 +436,7 @@
     selected = (selected + direction + actions.length) % actions.length; renderCarousel();
   }
   function select() {
-    if (hatchInYard || statusOpen || devLogOpen) { return; }
+    if (hatchInYard || statusOpen) { return; }
     if (titleOpen) { selectTitle(); return; }
     if (eggOpen) { beginHatch(); return; }
     if (!menuOpen) { return; }
@@ -475,8 +447,8 @@
   }
   function selectTitle() {
     if (titleSelected === 0) { startTitle(); }
-    else if (titleSelected === 1) { toast("Options serão adicionadas em uma próxima versão."); logEvent("OPTIONS selecionado; nenhum ajuste disponível ainda."); }
-    else { toast("EXIT está disponível apenas quando o host permitir."); logEvent("EXIT selecionado; fechamento ignorado no modo web."); }
+    else if (titleSelected === 1) { toast("Options serão adicionadas em uma próxima versão."); }
+    else { toast("EXIT está disponível apenas quando o host permitir."); }
   }
   function renderCarousel() {
     var track = byId("carousel-track");
@@ -497,21 +469,20 @@
     }
     byId("carousel").className = menuOpen ? "carousel" : "carousel menu-hidden";
   }
-  function openSubmenu(name) { submenu = name; submenuSelected = 0; menuOpen = true; renderCarousel(); logEvent("Submenu aberto: " + name + "."); toast(name === "feed" ? "Escolha o que oferecer." : (name === "play" ? "Escolha uma brincadeira." : "Escolha como descansar.")); }
+  function openSubmenu(name) { submenu = name; submenuSelected = 0; menuOpen = true; renderCarousel(); toast(name === "feed" ? "Escolha o que oferecer." : (name === "play" ? "Escolha uma brincadeira." : "Escolha como descansar.")); }
   function performAction(id) {
     if (id === "feed") { openSubmenu("feed"); return; }
     if (id === "play") { openSubmenu("play"); return; }
     if (id === "sleep") { openSubmenu("sleep"); return; }
-    if (id === "new") { showEggSelection(); return; }
     if (state.sleeping) { state.sleeping = false; state.expression = "neutral"; clearAnimation(); }
     if (id === "clean") { performClean(); return; }
     if (id === "pet") { performPet(); }
   }
   function finishAction(actionName, message, animationName, reaction) {
-    state.care += 1; recordRoutine(actionName); gainBond(actionName === "pet" ? 2 : 1); remember(state.name + " recebeu " + message + "."); save(); render(); var particleKind = actionName === "pet" ? "pet" : (actionName === "clean" ? "clean" : ((actionName === "snack" || actionName === "meal" || actionName === "water") ? "feed" : "play")); spawnParticles(particleKind); react(reaction || "bounce"); logEvent("Ação concluída: " + actionName + "."); toast(message.charAt(0).toUpperCase() + message.slice(1) + "."); playSequence(animationName, 2, returnToIdle);
+    state.care += 1; recordRoutine(actionName); gainBond(actionName === "pet" ? 2 : 1); remember(state.name + " recebeu " + message + "."); save(); render(); var particleKind = actionName === "pet" ? "pet" : (actionName === "clean" ? "clean" : ((actionName === "snack" || actionName === "meal" || actionName === "water") ? "feed" : "play")); spawnParticles(particleKind); react(reaction || "bounce"); toast(message.charAt(0).toUpperCase() + message.slice(1) + "."); playSequence(animationName, 2, returnToIdle);
   }
   function performClean() {
-    if (state.hygiene >= 94 && state.dirt < 10 && state.poop < 10) { state.happiness = clamp(state.happiness + 1); toast("Está tudo limpinho por aqui."); logEvent("Limpeza conferida sem necessidade de intervenção."); return; }
+    if (state.hygiene >= 94 && state.dirt < 10 && state.poop < 10) { state.happiness = clamp(state.happiness + 1); toast("Está tudo limpinho por aqui."); return; }
     state.hygiene = clamp(state.hygiene + 30); state.dirt = 0; state.poop = 0; state.happiness = clamp(state.happiness + 7); state.health = clamp(state.health + 4); finishAction("clean", "tudo limpo e aconchegante", state.species === "Fogo" ? "play" : "clean", "wiggle");
   }
   function performPet() {
@@ -525,48 +496,33 @@
     submenu = null; var feedAnimation = state.species === "Fogo" ? option : "eating"; finishAction(option, option === "water" ? "água fresquinha" : (option === "meal" ? "comida servida" : "um lanchinho"), feedAnimation, "bounce");
   }
   function performPlay(option) {
-    if (state.energy <= 12) { state.happiness = clamp(state.happiness + 1); toast("Ele está cansado; uma pausa gentil ajuda."); remember(state.name + " recebeu um limite gentil."); save(); render(); logEvent("Brincadeira adiada por energia baixa."); return; }
+    if (state.energy <= 12) { state.happiness = clamp(state.happiness + 1); toast("Ele está cansado; uma pausa gentil ajuda."); remember(state.name + " recebeu um limite gentil."); save(); render(); return; }
     state.happiness = clamp(state.happiness + (option === "dance" ? 15 : option === "train" ? 11 : 9)); state.energy = clamp(state.energy - (option === "dance" ? 6 : option === "train" ? 8 : 3)); state.hunger = clamp(state.hunger - 2); state.hygiene = clamp(state.hygiene - 1); submenu = null; var playAnimation = state.species === "Fogo" && option === "train" ? "attack" : "play"; finishAction(option, option === "dance" ? "que dança divertida" : (option === "train" ? "treino concluído" : "passeio tranquilo"), playAnimation, "shake");
   }
   function performSleep(option) {
     var gain = option === "quick" ? 16 : (option === "nap" ? 34 : 55);
-    state.energy = clamp(state.energy + gain); state.health = clamp(state.health + (option === "deep" ? 7 : 4)); state.hunger = clamp(state.hunger - (option === "deep" ? 4 : 2)); state.happiness = clamp(state.happiness + 2); state.care += 1; recordRoutine("sleep_" + option); gainBond(1); remember(state.name + " descansou com tranquilidade.");     state.sleeping = true; state.expression = "sleep"; submenu = null; clearAnimation(); save(); render(); spawnParticles("sleep"); logEvent("Sono iniciado: " + option + "."); toast("Zzz... uma pausa faz bem."); playSequence(state.species === "Fogo" ? "sleep-zzz" : "sleep", 0, null);
+    state.energy = clamp(state.energy + gain); state.health = clamp(state.health + (option === "deep" ? 7 : 4)); state.hunger = clamp(state.hunger - (option === "deep" ? 4 : 2)); state.happiness = clamp(state.happiness + 2); state.care += 1; recordRoutine("sleep_" + option); gainBond(1); remember(state.name + " descansou com tranquilidade.");     state.sleeping = true; state.expression = "sleep"; submenu = null; clearAnimation(); save(); render(); spawnParticles("sleep"); toast("Zzz... uma pausa faz bem."); playSequence(state.species === "Fogo" ? "sleep-zzz" : "sleep", 0, null);
   }
   function backAction() {
-    if (devLogOpen) { closeDevLog(); return false; }
     if (hatchInYard) { toast("O ovo está eclodindo; aguarde só um instante."); return false; }
-    if (eggOpen) { eggOpen = false; titleOpen = true; setOverlay("egg-modal", false); setOverlay("title-modal", true); renderTitleMenu(); logEvent("Seleção de ovos cancelada; retorno ao título."); return false; }
+    if (eggOpen) { eggOpen = false; titleOpen = true; setOverlay("egg-modal", false); setOverlay("title-modal", true); renderTitleMenu(); return false; }
     if (titleOpen) { return false; }
     if (statusOpen) { closeStatus(); return false; }
-    if (submenu) { submenu = null; submenuSelected = 0; menuOpen = true; renderCarousel(); toast("Menu principal."); logEvent("Voltou do submenu para o menu principal."); return false; }
-    menuOpen = !menuOpen; renderCarousel(); toast(menuOpen ? "Menu aberto." : "Menu recolhido."); logEvent(menuOpen ? "Menu principal aberto." : "Menu principal recolhido."); return false;
+    if (submenu) { submenu = null; submenuSelected = 0; menuOpen = true; renderCarousel(); toast("Menu principal."); return false; }
+    menuOpen = !menuOpen; renderCarousel(); toast(menuOpen ? "Menu aberto." : "Menu recolhido."); return false;
   }
   function openStatus() {
-    if (titleOpen || eggOpen || hatchInYard || devLogOpen) { return; }
-    statusOpen = true; submenu = null; setOverlay("status-view", false); byId("home-view").style.display = "none"; byId("status-view").style.display = "block"; byId("status-view").setAttribute("aria-hidden", "false"); render(); logEvent("Tela de status aberta.");
+    if (titleOpen || eggOpen || hatchInYard) { return; }
+    statusOpen = true; submenu = null; setOverlay("status-view", false); byId("home-view").style.display = "none"; byId("status-view").style.display = "block"; byId("status-view").setAttribute("aria-hidden", "false"); render();
   }
-  function closeStatus() { statusOpen = false; byId("status-view").style.display = "none"; byId("status-view").setAttribute("aria-hidden", "true"); byId("home-view").style.display = "block"; renderCarousel(); render(); logEvent("Tela de status fechada."); }
-  function openDevLog() {
-    if (devLogOpen) { closeDevLog(); return; }
-    devLogOpen = true; clearAnimation(); setOverlay("dev-log-modal", true); renderLog(); logEvent("DEV LOG aberto.");
-  }
-  function closeDevLog() {
-    devLogOpen = false; setOverlay("dev-log-modal", false); render(); if (titleOpen) { setOverlay("title-modal", true); } if (eggOpen) { setOverlay("egg-modal", true); } logEvent("DEV LOG fechado; estado anterior restaurado.");
-  }
-  function exportLog() {
-    var lines = ["MiniKyumons DEV LOG", "Build: V1.1 rebuild baseada no protótipo HTA", "Exportado em: " + new Date().toLocaleString("pt-BR"), ""];
-    for (var i = 0; i < devLog.length; i += 1) { lines.push("[" + devLog[i].time + "] " + devLog[i].text); }
-    var blob = new Blob([lines.join("\r\n")], { type: "text/plain;charset=utf-8" });
-    if (window.navigator.msSaveOrOpenBlob) { window.navigator.msSaveOrOpenBlob(blob, "minikyumons-dev-log.txt"); return; }
-    var link = document.createElement("a"); link.href = window.URL.createObjectURL(blob); link.download = "minikyumons-dev-log.txt"; link.style.display = "none"; document.body.appendChild(link); link.click(); document.body.removeChild(link); logEvent("DEV LOG exportado para TXT.");
-  }
-  function clearLog() { devLog = []; saveLog(); renderLog(); logEvent("DEV LOG limpo pelo usuário."); }
+  function closeStatus() { statusOpen = false; byId("status-view").style.display = "none"; byId("status-view").setAttribute("aria-hidden", "true"); byId("home-view").style.display = "block"; renderCarousel(); render(); }
   function tick() {
+    updateDayNight();
     if (!state || !state.started || hatchInYard) { return; }
     var current = new Date().getTime(); var minutes = (current - lastTick) / 60000;
     if (minutes >= 1) {
       var factor = Math.min(minutes, 10);
-      state.hunger = clamp(state.hunger - factor * .06); state.energy = clamp(state.energy - factor * .036); state.happiness = clamp(state.happiness - factor * .026); state.hygiene = clamp(state.hygiene - factor * .033); state.dirt = clamp(state.dirt + factor * .006); state.totalMinutes += factor; lastTick = current; save(); render(); logEvent("Ciclo de manutenção aplicado: " + Math.round(factor) + " minuto(s).");
+      state.hunger = clamp(state.hunger - factor * .06); state.energy = clamp(state.energy - factor * .036); state.happiness = clamp(state.happiness - factor * .026); state.hygiene = clamp(state.hygiene - factor * .033); state.dirt = clamp(state.dirt + factor * .006); state.totalMinutes += factor; lastTick = current; save(); render();
     }
     if (byId("screen-time")) { byId("screen-time").innerHTML = nowText(); }
     if (byId("footer-time")) { byId("footer-time").innerHTML = nowText(); }
@@ -575,21 +531,19 @@
     var titleButtons = byId("title-modal").getElementsByTagName("button");
     for (var i = 0; i < titleButtons.length; i += 1) { titleButtons[i].onclick = function () { titleSelected = this.getAttribute("data-title") === "start" ? 0 : (this.getAttribute("data-title") === "options" ? 1 : 2); renderTitleMenu(); selectTitle(); }; }
     var eggButtons = byId("egg-modal").getElementsByClassName("egg-choice");
-    for (var j = 0; j < eggButtons.length; j += 1) { eggButtons[j].onclick = function () { eggSelected = speciesList.indexOf(this.getAttribute("data-species")); renderEggChoices(); logEvent("Ovo escolhido por clique: " + speciesList[eggSelected] + "."); }; }
+    for (var j = 0; j < eggButtons.length; j += 1) { eggButtons[j].onclick = function () { eggSelected = speciesList.indexOf(this.getAttribute("data-species")); renderEggChoices(); }; }
     byId("egg-back").onclick = function () { backAction(); };
     byId("carousel-left").onclick = function () { move(-1); }; byId("carousel-right").onclick = function () { move(1); };
     byId("dpad-left").onclick = function () { move(-1); }; byId("dpad-right").onclick = function () { move(1); }; byId("dpad-up").onclick = function () { move(-1); }; byId("dpad-down").onclick = function () { move(1); };
     byId("green-button").onclick = select; byId("yellow-button").onclick = backAction; byId("pink-button").onclick = function () { if (statusOpen) { closeStatus(); } else { openStatus(); } };
-    byId("dev-log-button").onclick = openDevLog; byId("dev-log-close").onclick = closeDevLog; byId("dev-log-export").onclick = exportLog; byId("dev-log-clear").onclick = clearLog;
     document.onkeydown = function (event) {
       var e = event || window.event; var code = e.keyCode || e.which;
       if (code === 37 || code === 38) { move(-1); }
       else if (code === 39 || code === 40) { move(1); }
       else if (code === 13 || code === 32) { select(); }
       else if (code === 83) { if (statusOpen) { closeStatus(); } else { openStatus(); } }
-      else if (code === 76) { openDevLog(); }
       else if (code === 27 || code === 88) { backAction(); }
-      if (code === 37 || code === 38 || code === 39 || code === 40 || code === 13 || code === 32 || code === 83 || code === 76 || code === 27 || code === 88) { e.preventDefault(); }
+      if (code === 37 || code === 38 || code === 39 || code === 40 || code === 13 || code === 32 || code === 83 || code === 27 || code === 88) { e.preventDefault(); }
     };
   }
   function scaleConsole() {
@@ -604,7 +558,7 @@
   function init() {
     load(); wire(); renderCarousel(); render(); showStartupTitle();
     idleTimer = window.setInterval(idleStep, 5000); window.setInterval(tick, 10000); window.onresize = scaleConsole; scaleConsole();
-    window.__miniKyumonsDebug = { getState: function () { return state; }, getLog: function () { return devLog; }, showEggSelection: showEggSelection, beginHatch: beginHatch, finishHatch: finishHatch, closeDevLog: closeDevLog };
+    window.__miniKyumonsDebug = { getState: function () { return state; }, showEggSelection: showEggSelection, beginHatch: beginHatch, finishHatch: finishHatch };
   }
   init();
 }());
