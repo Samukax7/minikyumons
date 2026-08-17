@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta charset="utf-8">
+<title>MiniKyumons Pocket WebView</title>
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+  <div class="brand-row">
+    <div class="brand"><span class="brand-mark">✦</span><h1>MiniKyumons</h1><div class="brand-sub">pocket care device</div></div>
+    <div class="brand-side">LOCAL <span class="battery"></span></div>
+  </div>
+  <div class="screen-bezel">
+    <div class="screen">
+      <div class="screen-view home-view" id="home-view">
+        <div class="ui-top"><span class="left" id="screen-stage">BEBÊ · KYU</span><span class="right">● <span id="screen-time">--:--</span></span></div>
+        <div class="home-pet-area">
+          <div class="yard-parallax" id="yard-parallax"><div class="yard-image" id="yard-image"></div><div class="yard-parallax-tint"></div><div class="parallax-sun" id="parallax-sun"></div><div class="parallax-moon" id="parallax-moon"></div></div><div class="yard-back"></div><div class="yard-middle"></div><div class="yard-path"></div><div class="yard-fence"></div>
+          <div class="cloud a"></div><div class="cloud b"></div>
+          <div class="scene-glass"></div>
+          <div class="particle-layer" id="particle-layer"></div>
+          <div class="dirt-mark" id="dirt-mark"></div>
+          <div class="yard-background" id="yard-background"><div class="yard-ground"></div></div>
+  <div class="pet-placeholder asset-mode" id="pet-placeholder">
+            <div class="emotion-overlay" id="emotion-overlay"></div>
+            <img class="pet-asset" id="pet-asset" src="assets/animations64/water/idle-01.png" alt="MiniKyumon selecionado"><img class="hatch-yard-egg" id="hatch-yard-egg" src="assets/eggs/water.png" alt="Ovo em incubação">
+            <div class="pet-shadow"></div>
+          </div>
+        </div>
+        <div class="submenu-strip menu-hidden" id="submenu-strip"><div class="submenu-track" id="submenu-track"></div></div>
+        <div class="carousel" id="carousel"><button class="carousel-arrow left" id="carousel-left">‹</button><div class="carousel-track" id="carousel-track"></div><button class="carousel-arrow right" id="carousel-right">›</button></div>
+        <div class="home-footer"><span class="hint">D-PAD NAVEGA · VERDE CONFIRMA</span><span class="time" id="footer-time">--:--</span></div>
+      </div>
+      <div class="screen-view status-view" id="status-view">
+        <h2>Status do MiniKyumon</h2>
+        <div class="status-grid"><div class="status-cell"><strong id="status-bond">0</strong><span>VÍNCULO</span></div><div class="status-cell"><strong id="status-care">0</strong><span>CUIDADOS</span></div><div class="status-cell"><strong id="status-memories">0</strong><span>MEMÓRIAS</span></div></div>
+        <div class="status-bars"><div class="bar-row"><div class="bar-label"><span>Fome</span><span id="status-hunger-text">0%</span></div><div class="bar"><div class="bar-fill f-hunger" id="status-hunger"></div></div></div><div class="bar-row"><div class="bar-label"><span>Energia</span><span id="status-energy-text">0%</span></div><div class="bar"><div class="bar-fill f-energy" id="status-energy"></div></div></div><div class="bar-row"><div class="bar-label"><span>Humor</span><span id="status-happiness-text">0%</span></div><div class="bar"><div class="bar-fill f-happiness" id="status-happiness"></div></div></div><div class="bar-row"><div class="bar-label"><span>Higiene</span><span id="status-hygiene-text">0%</span></div><div class="bar"><div class="bar-fill f-hygiene" id="status-hygiene"></div></div></div><div class="bar-row"><div class="bar-label"><span>Saúde</span><span id="status-health-text">0%</span></div><div class="bar"><div class="bar-fill f-health" id="status-health"></div></div></div></div>
+        <div class="identity"><strong id="status-name">Kyu</strong> · <span id="status-species">Bubblum</span> · <span id="status-stage">Bebê</span><div class="general-state" id="status-general">Estado geral: Acolhido</div><div class="profile-line" id="status-profile">Personalidade: ainda se formando · Rotina: 0 dias</div><div class="memory-line" id="status-memory">Última memória: o ovo chegou a um lugar seguro.</div></div>
+        <button class="back-status" id="back-status">Voltar para o pet</button>
+      </div>
+      <div class="screen-overlay title-modal" id="title-modal"><h2>MINIKYUMONS</h2><p class="title-sub">pocket care device</p><button class="title-menu selected" data-title="start">START</button><button class="title-menu" data-title="options">OPTIONS</button><button class="title-menu" data-title="exit">EXIT</button></div><div class="screen-overlay egg-modal" id="egg-modal"><h2>Escolha seu ovo</h2><p class="egg-lead">Um pequeno companheiro está esperando por você.</p><div class="egg-choices"><button class="egg-choice selected" data-species="Água"><img src="assets/eggs/water.png"><strong>ÁGUA</strong><small>calmo e curioso</small></button><button class="egg-choice" data-species="Planta"><img src="assets/eggs/plant.png"><strong>PLANTA</strong><small>gentil e observador</small></button><button class="egg-choice" data-species="Fogo"><img src="assets/eggs/fire.png"><strong>FOGO</strong><small>brincalhão e intenso</small></button></div><div class="egg-actions"><button id="egg-back">Voltar</button></div></div><div class="screen-overlay hatch-modal" id="hatch-modal"><h2>Seu ovo está eclodindo</h2><div class="hatch-scene"><img class="hatch-egg" id="hatch-egg" src="assets/eggs/water.png"><img class="hatch-pet" id="hatch-pet" src="assets/animations64/water/idle-01.png"></div><p class="hatch-progress" id="hatch-progress">Preparando o primeiro encontro...</p></div>
+    </div>
+  </div>
+  <div class="controls">
+    <div class="dpad-zone"><div class="dpad"><button class="up" id="dpad-up">▲</button><button class="left" id="dpad-left">‹</button><button class="right" id="dpad-right">›</button><button class="down" id="dpad-down">▼</button></div></div>
+    <div class="center-controls">MINIKYUMONS<br><span style="font-size:8px;letter-spacing:0">CARE DEVICE</span></div>
+    <div class="face-buttons"><button class="face-button yellow" id="yellow-button">B</button><button class="face-button green" id="green-button">A</button><button class="face-button pink" id="pink-button">S</button><div class="controls-label">VOLTAR · OK · STATUS</div></div>
+  </div>
+</div>
+<div class="modal" id="new-pet-modal"><h2>Novo ovo</h2><p>Escolha uma criatura para iniciar uma nova rotina de cuidado.</p><label>Nome</label><input id="pet-name-input" maxlength="16" value="Kyu"><label>Espécie</label><select id="species-input"><option>Água</option><option>Fogo</option><option>Planta</option></select><div class="modal-actions"><button class="cancel" id="cancel-new">Cancelar</button> <button class="confirm" id="confirm-new">Chocar ovo</button></div></div>
+<div class="toast" id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>
