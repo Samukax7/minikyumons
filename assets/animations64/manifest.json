@@ -1,0 +1,23 @@
+{
+  "canvas": [
+    64,
+    64
+  ],
+  "fps": {
+    "idle": 5,
+    "eating": 7,
+    "play": 8,
+    "pet": 8,
+    "clean": 8,
+    "sleep": 3
+  },
+  "loop": {
+    "idle": true,
+    "sleep": true,
+    "eating": false,
+    "play": false,
+    "pet": false,
+    "clean": false
+  },
+  "notes": "Frames are intentionally centered on a common feet baseline. Idle currently uses the redesigned base, lateral gaze frames, and repeated holds; dedicated breath redraws can replace the repeated base frames later."
+}
